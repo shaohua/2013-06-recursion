@@ -74,6 +74,11 @@ var parseJSON = function (json) {
       return output;
     }
 
+    //count number of [ and ]
+    if( (json.match(/\[/g) || []).length !== (json.match(/\]/g) || []).length ){
+      throw new Error();
+    }
+
     var comma_loc = findComma(json);
 
     if(comma_loc.length===0){
@@ -105,6 +110,11 @@ var parseJSON = function (json) {
     //check for empty{}
     if(json==='{}'){
       return output;
+    }
+
+    //count number of { and }
+    if( (json.match(/\{/g) || []).length !== (json.match(/\}/g) || []).length ){
+      throw new Error();
     }
 
     //find locations of , to split
@@ -151,7 +161,18 @@ var parseJSON = function (json) {
     console.log('------------no-obj-no-array--------',json);
     var output='';
 
+    //make sure the syntax is correct for 'json'
+    //being lazy here
+    //using eval is dangerous
+    try{
+      eval(json);
+    } catch (error){
+      console.log(error);
+      throw error;
+    }
+
     if(isNaN(json)){
+      //boolean, null and undefined
       switch(json){
         case 'null':
           output = null;
@@ -173,14 +194,14 @@ var parseJSON = function (json) {
 
       //string, remove " "
       if(startWith(json, '"')){
-        output = json.slice(1,json.length);
-        if(output.slice(output.length-1,output.length) === '"'){
-          output = output.slice(0,output.length-1);
+        if(json.slice(json.length-1,json.length) === '"'){
+          output = json.slice(1,json.length-1);
         }
         return output;
       }
 
     }else{
+      //number
       output = Number(json);
       return output;
     }
